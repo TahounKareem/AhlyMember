@@ -86,7 +86,7 @@ export const Home = ({ onOpenModal }: { onOpenModal: (payload: any) => void }) =
   return (
     <div className="space-y-16">
       {/* Slider */}
-      <div className="slider-container shadow-lg cursor-pointer mb-16" style={{ marginTop: '0' }} onClick={() => onOpenModal({ type: 'slider-promo', data: slide })}>
+      <div className="slider-container shadow-lg cursor-pointer" style={{ marginTop: '0' }} onClick={() => onOpenModal({ type: 'slider-promo', data: slide })}>
         <div className="slide fade w-full h-full">
           <img src={slide.img || slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
           <div className="slide-text">
