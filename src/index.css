@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #ae0101;
+  --color-brand-gold: #f9a825;
+  --color-brand-light-gold: #fffbeb;
+  --font-cairo: "Cairo", sans-serif;
+}
+
+body {
+  font-family: var(--font-cairo);
+  background-color: #f8f4f4;
+}
+
+.brand-red {
+  color: var(--color-brand-red);
+}
+
+.brand-bg-red {
+  background-color: var(--color-brand-red);
+}
+
+.brand-bg-gold {
+  background-color: var(--color-brand-gold);
+}
+
+.brand-bg-light-gold {
+  background-color: var(--color-brand-light-gold);
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+  background-color: var(--color-brand-red);
+  color: white;
+}
+
+.card-hover-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.slider-container { 
+  position: relative; 
+  max-width: 100%; 
+  margin: auto; 
+  overflow: hidden; 
+  border-radius: 12px; 
+  aspect-ratio: 16/7; 
+}
+
+.slide-text { 
+  position: absolute; 
+  bottom: 0; 
+  right: 0; 
+  width: 100%; 
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
+  color: white; 
+  padding: 40px 20px 20px; 
+  text-align: right;
+}
+
+.fade { 
+  animation-name: fade; 
+  animation-duration: 1.5s; 
+}
+
+@keyframes fade { 
+  from {opacity: .4} 
+  to {opacity: 1} 
+}
+
+/* Markdown prose overrides for RTL */
+.prose h1, .prose h2, .prose h3, .prose p, .prose ul, .prose ol {
+  text-align: right;
+}
