@@ -42,6 +42,8 @@ export const Admin = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [editingSlide, setEditingSlide] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [editingPost, setEditingPost] = useState<any>(null);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -132,7 +134,7 @@ export const Admin = () => {
     fetchData();
   };
 
-  const handleCreateEvent = async (e: React.FormEvent) => {
+  const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const title = (form.elements.namedItem('title') as HTMLInputElement).value;
@@ -145,11 +147,11 @@ export const Admin = () => {
     const imageUrlStr = (form.elements.namedItem('imageUrlStr') as HTMLInputElement).value;
     
     const fileInput = form.elements.namedItem('image') as HTMLInputElement;
-    let imageUrl = imageUrlStr || '';
+    let imageUrl = imageUrlStr || (editingEvent?.imageUrl || '');
     
     const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const oldText = submitBtn.innerText;
-    submitBtn.innerText = 'جاري الرفع...';
+    submitBtn.innerText = 'جاري الحفظ...';
     submitBtn.disabled = true;
 
     try {
@@ -157,7 +159,7 @@ export const Admin = () => {
         imageUrl = await resizeImage(fileInput.files[0]);
       }
 
-      await addDoc(collection(db, 'events'), {
+      const payload = {
         title,
         eventDateTime: date,
         location,
@@ -166,15 +168,24 @@ export const Admin = () => {
         category,
         order,
         imageUrl,
-        isHidden: false,
-        createdAt: new Date()
-      });
+      };
+
+      if (editingEvent) {
+        await updateDoc(doc(db, 'events', editingEvent.id), payload);
+        setEditingEvent(null);
+      } else {
+        await addDoc(collection(db, 'events'), {
+          ...payload,
+          isHidden: false,
+          createdAt: new Date()
+        });
+      }
 
       form.reset();
       fetchData();
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء إضافة الفعالية');
+      alert('حدث خطأ أثناء حفظ الفعالية');
     } finally {
       submitBtn.innerText = oldText;
       submitBtn.disabled = false;
@@ -198,7 +209,7 @@ export const Admin = () => {
     }
   };
 
-  const handleCreatePost = async (e: React.FormEvent) => {
+  const handleSavePost = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const title = (form.elements.namedItem('title') as HTMLInputElement).value;
@@ -209,11 +220,11 @@ export const Admin = () => {
     const imageUrlStr = (form.elements.namedItem('imageUrlStr') as HTMLInputElement).value;
     
     const fileInput = form.elements.namedItem('image') as HTMLInputElement;
-    let imageUrl = imageUrlStr || '';
+    let imageUrl = imageUrlStr || (editingPost?.imageUrl || '');
     
     const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const oldText = submitBtn.innerText;
-    submitBtn.innerText = 'جاري الرفع...';
+    submitBtn.innerText = 'جاري الحفظ...';
     submitBtn.disabled = true;
 
     try {
@@ -221,22 +232,31 @@ export const Admin = () => {
         imageUrl = await resizeImage(fileInput.files[0]);
       }
 
-      await addDoc(collection(db, 'posts'), {
+      const payload = {
         title,
         postDate: date,
         content,
         category,
         order,
         imageUrl,
-        isHidden: false,
-        createdAt: new Date()
-      });
+      };
+
+      if (editingPost) {
+        await updateDoc(doc(db, 'posts', editingPost.id), payload);
+        setEditingPost(null);
+      } else {
+        await addDoc(collection(db, 'posts'), {
+          ...payload,
+          isHidden: false,
+          createdAt: new Date()
+        });
+      }
 
       form.reset();
       fetchData();
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء إضافة المنشور');
+      alert('حدث خطأ أثناء حفظ المنشور');
     } finally {
       submitBtn.innerText = oldText;
       submitBtn.disabled = false;
@@ -263,17 +283,22 @@ export const Admin = () => {
         {/* Events Management */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-6 lg:col-span-2">
           <h3 className="text-2xl font-bold mb-4">إدارة الفعاليات</h3>
-          <form onSubmit={handleCreateEvent} className="space-y-4 bg-gray-50 p-4 rounded-lg border">
-             <h4 className="font-bold text-lg mb-2">إضافة فعالية جديدة</h4>
+          <form onSubmit={handleSaveEvent} className="space-y-4 bg-gray-50 p-4 rounded-lg border" id="event-form">
+             <div className="flex justify-between items-center mb-4">
+               <h4 className="font-bold text-lg">{editingEvent ? 'تعديل الفعالية' : 'إضافة فعالية جديدة'}</h4>
+               {editingEvent && (
+                 <button type="button" onClick={() => { setEditingEvent(null); (document.getElementById('event-form') as HTMLFormElement).reset(); }} className="text-sm text-gray-500 hover:text-gray-800">إلغاء التعديل</button>
+               )}
+             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <input name="title" placeholder="عنوان الفعالية" className="shadow w-full p-2 border rounded" required />
-               <input name="date" type="datetime-local" placeholder="الموعد" className="shadow w-full p-2 border rounded" required />
-               <input name="location" placeholder="المكان" className="shadow w-full p-2 border rounded" required />
-               <input name="order" type="number" placeholder="ترتيب الظهور (مثال: 1, 2...)" className="shadow w-full p-2 border rounded" required />
+               <input name="title" defaultValue={editingEvent?.title} placeholder="عنوان الفعالية" className="shadow w-full p-2 border rounded" required />
+               <input name="date" type="datetime-local" defaultValue={editingEvent?.eventDateTime} placeholder="الموعد" className="shadow w-full p-2 border rounded" required />
+               <input name="location" defaultValue={editingEvent?.location} placeholder="المكان" className="shadow w-full p-2 border rounded" required />
+               <input name="order" type="number" defaultValue={editingEvent?.order || 0} placeholder="ترتيب الظهور (مثال: 1, 2...)" className="shadow w-full p-2 border rounded" required />
                <input name="image" type="file" accept="image/*" className="shadow w-full p-2 border rounded bg-white" />
-               <input name="imageUrlStr" placeholder="أو رابط مباشر لصورة (مرفقات)" className="shadow w-full p-2 border rounded" />
-               <input name="subMethod" placeholder="طريقة الاشتراك" className="shadow w-full p-2 border rounded" required />
-               <select name="category" className="shadow w-full p-2 border rounded bg-white" required>
+               <input name="imageUrlStr" defaultValue={editingEvent?.imageUrl} placeholder="أو رابط مباشر لصورة (مرفقات)" className="shadow w-full p-2 border rounded" />
+               <input name="subMethod" defaultValue={editingEvent?.subscriptionMethod} placeholder="طريقة الاشتراك" className="shadow w-full p-2 border rounded" required />
+               <select name="category" defaultValue={editingEvent?.category || ''} className="shadow w-full p-2 border rounded bg-white" required>
                  <option value="">اختر نوع الفعالية...</option>
                  <option value="فعاليات عامة">فعاليات عامة</option>
                  <option value="فعاليات فنية">فعاليات فنية</option>
@@ -282,8 +307,10 @@ export const Admin = () => {
                  <option value="فعاليات رواد">فعاليات رواد</option>
                </select>
              </div>
-             <textarea name="content" rows={4} placeholder="الوصف (يدعم ماركداون)" className="shadow w-full p-2 border rounded" required></textarea>
-             <button type="submit" className="brand-bg-red text-white font-bold py-2 px-6 rounded w-full md:w-auto">تأكيد الإضافة</button>
+             <textarea name="content" defaultValue={editingEvent?.content} rows={4} placeholder="الوصف (يدعم ماركداون)" className="shadow w-full p-2 border rounded" required></textarea>
+             <button type="submit" className="brand-bg-red text-white font-bold py-2 px-6 rounded w-full md:w-auto">
+               {editingEvent ? 'حفظ التعديلات' : 'تأكيد الإضافة'}
+             </button>
           </form>
 
           <hr className="my-6" />
@@ -321,7 +348,11 @@ export const Admin = () => {
                       <td className="border p-2 font-bold max-w-[200px] truncate">{e.title}</td>
                       <td className="border p-2">{d}</td>
                       <td className="border p-2 text-sm">{e.isHidden ? 'مخفية' : 'ظاهرة'}</td>
-                      <td className="border p-2 space-x-2 space-x-reverse min-w-[120px]">
+                      <td className="border p-2 space-x-2 space-x-reverse min-w-[170px]">
+                        <button onClick={() => {
+                          setEditingEvent(e);
+                          window.scrollTo({ top: document.getElementById('event-form')?.offsetTop || 0, behavior: 'smooth' });
+                        }} className="text-green-600 font-bold hover:underline">تعديل</button>
                         <button onClick={() => handleToggleHideEvent(e.id, !!e.isHidden)} className="text-blue-600 font-bold hover:underline">
                           {e.isHidden ? 'إظهار' : 'إخفاء'}
                         </button>
@@ -339,23 +370,30 @@ export const Admin = () => {
         {/* Posts Management */}
         <div className="bg-white p-6 rounded-lg shadow-md space-y-6 lg:col-span-2">
           <h3 className="text-2xl font-bold mb-4">إدارة المنشورات</h3>
-          <form onSubmit={handleCreatePost} className="space-y-4 bg-gray-50 p-4 rounded-lg border">
-             <h4 className="font-bold text-lg mb-2">إضافة منشور جديد</h4>
+          <form onSubmit={handleSavePost} className="space-y-4 bg-gray-50 p-4 rounded-lg border" id="post-form">
+             <div className="flex justify-between items-center mb-4">
+               <h4 className="font-bold text-lg">{editingPost ? 'تعديل المنشور' : 'إضافة منشور جديد'}</h4>
+               {editingPost && (
+                 <button type="button" onClick={() => { setEditingPost(null); (document.getElementById('post-form') as HTMLFormElement).reset(); }} className="text-sm text-gray-500 hover:text-gray-800">إلغاء التعديل</button>
+               )}
+             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <input name="title" placeholder="عنوان المنشور" className="shadow w-full p-2 border rounded" required />
-               <input name="date" type="datetime-local" placeholder="تاريخ المنشور" className="shadow w-full p-2 border rounded" required />
-               <input name="order" type="number" placeholder="ترتيب الظهور (مثال: 1, 2...)" className="shadow w-full p-2 border rounded" required />
+               <input name="title" defaultValue={editingPost?.title} placeholder="عنوان المنشور" className="shadow w-full p-2 border rounded" required />
+               <input name="date" type="datetime-local" defaultValue={editingPost?.postDate} placeholder="تاريخ المنشور" className="shadow w-full p-2 border rounded" required />
+               <input name="order" type="number" defaultValue={editingPost?.order || 0} placeholder="ترتيب الظهور (مثال: 1, 2...)" className="shadow w-full p-2 border rounded" required />
                <input name="image" type="file" accept="image/*" className="shadow w-full p-2 border rounded bg-white" />
-               <input name="imageUrlStr" placeholder="أو رابط مباشر لصورة (مرفقات)" className="shadow w-full p-2 border rounded" />
-               <select name="category" className="shadow w-full p-2 border rounded bg-white" required>
+               <input name="imageUrlStr" defaultValue={editingPost?.imageUrl} placeholder="أو رابط مباشر لصورة (مرفقات)" className="shadow w-full p-2 border rounded" />
+               <select name="category" defaultValue={editingPost?.category || ''} className="shadow w-full p-2 border rounded bg-white" required>
                  <option value="">اختر نوع المنشور...</option>
                  <option value="خبر">خبر</option>
                  <option value="مقال">مقال</option>
                  <option value="مشاركة الأعضاء">مشاركة الأعضاء</option>
                </select>
              </div>
-             <textarea name="content" rows={4} placeholder="الوصف (يدعم ماركداون)" className="shadow w-full p-2 border rounded" required></textarea>
-             <button type="submit" className="brand-bg-red text-white font-bold py-2 px-6 rounded w-full md:w-auto">تأكيد الإضافة</button>
+             <textarea name="content" defaultValue={editingPost?.content} rows={4} placeholder="الوصف (يدعم ماركداون)" className="shadow w-full p-2 border rounded" required></textarea>
+             <button type="submit" className="brand-bg-red text-white font-bold py-2 px-6 rounded w-full md:w-auto">
+               {editingPost ? 'حفظ التعديلات' : 'تأكيد الإضافة'}
+             </button>
           </form>
 
           <hr className="my-6" />
@@ -395,7 +433,11 @@ export const Admin = () => {
                       <td className="border p-2">{d}</td>
                       <td className="border p-2">{p.category}</td>
                       <td className="border p-2 text-sm">{p.isHidden ? 'مخفي' : 'ظاهر'}</td>
-                      <td className="border p-2 space-x-2 space-x-reverse min-w-[120px]">
+                      <td className="border p-2 space-x-2 space-x-reverse min-w-[170px]">
+                        <button onClick={() => {
+                          setEditingPost(p);
+                          window.scrollTo({ top: document.getElementById('post-form')?.offsetTop || 0, behavior: 'smooth' });
+                        }} className="text-green-600 font-bold hover:underline">تعديل</button>
                         <button onClick={() => handleToggleHidePost(p.id, !!p.isHidden)} className="text-blue-600 font-bold hover:underline">
                           {p.isHidden ? 'إظهار' : 'إخفاء'}
                         </button>

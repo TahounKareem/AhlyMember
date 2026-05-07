@@ -125,8 +125,8 @@ export const Modals = ({ activeModal, onClose }: ModalsProps) => {
       title = 'اتصل بنا';
       content = (
           <div className="text-center">
-           <p className="text-lg text-gray-700 my-4">يمكنكم التواصل معنا عبر الواتساب للإستفسارات أو الدعم.</p>
-           <a href="https://wa.me/201002642521?text=برجاء التواصل معي بهدف الاستفسار" target="_blank" rel="noopener noreferrer" className="mt-4 inline-block brand-bg-gold hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">تواصل عبر واتساب</a>
+           <p className="text-lg text-gray-700 my-4">شارك إستفسارك أو تواصل معنا عبر الجروب الأكبر والأكثر تفاعلا بالنادي الأهلي.</p>
+           <a href="https://www.facebook.com/groups/AhlyNewCairo" target="_blank" rel="noopener noreferrer" className="mt-4 block brand-bg-gold hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg w-full">تواصل معنا عبر جروب الفيسبوك</a>
           </div>
       );
       break;
@@ -135,7 +135,7 @@ export const Modals = ({ activeModal, onClose }: ModalsProps) => {
        content = (
            <div className="text-center">
             <p className="text-lg text-gray-700 my-4">نحن نقدم خيارات إعلانية متنوعة تناسب احتياجاتك. تواصل معنا للحصول على الباقات الإعلانية.</p>
-            <a href="https://wa.me/201002642521?text=برجاء التواصل معي بهدف إضافة إعلان" target="_blank" rel="noopener noreferrer" className="mt-4 inline-block brand-bg-gold hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">إضافة إعلان (واتساب)</a>
+            <a href="https://discounts.ahlymember.com/advertise" target="_blank" rel="noopener noreferrer" className="mt-4 block brand-bg-gold hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg w-full">أضف إعلانك الآن</a>
            </div>
        );
        break;
