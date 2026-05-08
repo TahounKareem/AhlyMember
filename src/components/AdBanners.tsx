@@ -36,7 +36,7 @@ export const AdBanners = () => {
 
       {/* Ads Banner */}
       <a 
-        href="https://Ads.ahlymember.com" 
+        href="https://discounts.ahlymember.com/advertise" 
         target="_blank" 
         rel="noopener noreferrer"
         className="block relative overflow-hidden rounded-2xl shadow-md border-2 border-dashed border-gray-300 transition-all duration-300 hover:border-red-500 hover:shadow-xl group bg-gray-50 hover:bg-gray-100/80"

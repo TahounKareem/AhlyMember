@@ -17,6 +17,7 @@ export const Home = ({ onOpenModal }: { onOpenModal: (payload: any) => void }) =
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [activePoll, setActivePoll] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,19 +70,58 @@ export const Home = ({ onOpenModal }: { onOpenModal: (payload: any) => void }) =
         }
       } catch (err) {
         console.error('Error fetching home data:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, []);
 
   useEffect(() => {
+    if (isLoading) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, isLoading]);
 
   const slide = slides[currentSlide] || slides[0];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-16 animate-pulse">
+        <div className="w-full h-64 md:h-[500px] bg-gray-200 rounded-lg"></div>
+        <section>
+          <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                <div className="w-full h-48 bg-gray-200"></div>
+                <div className="p-4 flex-grow flex flex-col gap-2">
+                  <div className="h-6 bg-gray-200 rounded w-16"></div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section>
+          <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                <div className="w-full h-48 bg-gray-200"></div>
+                <div className="p-4 flex-grow flex flex-col gap-2">
+                  <div className="h-6 bg-gray-200 rounded w-16"></div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-16">
